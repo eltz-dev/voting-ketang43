@@ -1,1 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Panitia — Pemilihan Ketua Angkatan 43</title>
+<link rel="icon" type="image/jpeg" href="https://files.catbox.moe/adcvhb.jpeg">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ---- login ---- */
+  .login-card{
+    width:100%; max-width:380px;
+    background:var(--paper);
+    color:var(--text-dark);
+    border-radius:var(--radius-lg);
+    padding:36px 30px;
+    box-shadow:var(--shadow-deep);
+    text-align:left;
+  }
+  .login-card h3{ font-size:22px; margin-bottom:8px; }
+  .login-card p{ font-size:14px; color:var(--text-dark-muted); line-height:1.55; margin:0 0 22px; }
+  .field-label{ font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dark-muted); display:block; margin-bottom:8px; }
+  .pw-input{
+    width:100%;
+    font-family:var(--font-mono);
+    font-size:15px;
+    padding:14px 16px;
+    border-radius:10px;
+    border:1.5px solid var(--paper-line);
+    background:#fff;
+    color:var(--text-dark);
+    margin-bottom:8px;
+    letter-spacing:.05em;
+  }
+  .pw-input:focus{ outline:2px solid var(--ink-red); outline-offset:1px; }
+  .login-error{ font-size:13px; color:var(--ink-red-dark); min-height:18px; margin-bottom:14px; font-weight:600; }
+  .login-card .stamp-btn{ width:100%; text-align:center; }
+
+  /* ---- dashboard ---- */
+  .dash-wrap{ max-width:760px; margin:0 auto; padding:34px 20px 60px; }
+  .dash-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:26px; flex-wrap:wrap; }
+  .dash-top h1{ font-size:clamp(22px,5vw,28px); color:var(--text-light); margin-top:12px; }
+
+  .status-bar{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
+    margin-bottom:26px; padding:18px 20px;
+    background:var(--navy-800); border:1px solid var(--navy-700); border-radius:16px;
+  }
+  .status-left{ display:flex; align-items:center; gap:12px; }
+  .status-left .label{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); letter-spacing:.05em; text-transform:uppercase; }
+  .status-badge{ font-family:var(--font-mono); font-size:12px; letter-spacing:.06em; padding:6px 14px; border-radius:100px; font-weight:700; display:inline-block; margin-top:4px; }
+  .status-open{ background:rgba(92,143,104,.15); color:#93d6a3; border:1px solid rgba(92,143,104,.45); }
+  .status-closed{ background:rgba(181,49,47,.15); color:#e6928f; border:1px solid rgba(181,49,47,.45); }
+  .toggle-group{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  .summary-row{ display:flex; gap:14px; margin-bottom:26px; flex-wrap:wrap; }
+  .summary-card{ flex:1; min-width:140px; background:var(--navy-800); border:1px solid var(--navy-700); border-radius:14px; padding:16px 18px; }
+  .summary-card .num{ font-family:var(--font-mono); font-size:28px; font-weight:700; color:var(--gold-soft); }
+  .summary-card .lbl{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); letter-spacing:.05em; text-transform:uppercase; margin-top:4px; }
+
+  .results-title{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px; }
+  .results-list{ display:flex; flex-direction:column; gap:10px; }
+  .result-row{ background:var(--navy-800); border:1px solid var(--navy-700); border-radius:14px; padding:16px 18px; }
+  .result-top{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:10px; }
+  .result-info{ display:flex; align-items:baseline; gap:10px; min-width:0; }
+  .result-number{ font-family:var(--font-mono); font-size:12px; color:var(--gold-soft); flex:none; }
+  .result-name{ font-family:var(--font-display); font-weight:600; font-size:15.5px; color:var(--text-light); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vote-count{ font-family:var(--font-mono); font-weight:700; font-size:18px; color:var(--text-light); flex:none; }
+  .vote-bar-track{ height:7px; background:var(--navy-700); border-radius:6px; overflow:hidden; }
+  .vote-bar-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--ink-red),var(--gold)); border-radius:6px; transition:width .6s cubic-bezier(.2,.8,.3,1); }
+
+  .logout-link{ font-family:var(--font-mono); font-size:12px; color:var(--text-muted); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; margin-top:14px; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen" class="center-screen">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <div class="modal-seal gold">43</div>
+    <h3>Akses Panitia</h3>
+    <p>Halaman ini khusus panitia Pemilihan Ketua Angkatan 43. Masukkan kata sandi untuk melihat hasil perhitungan suara secara real-time.</p>
+    <span class="field-label">Kata Sandi</span>
+    <input type="password" class="pw-input" id="passwordInput" placeholder="••••••••••••" required>
+    <div class="login-error" id="loginError"></div>
+    <button type="submit" class="stamp-btn">
+      <span class="ripple" id="loginRipple"></span>
+      Masuk
+    </button>
+  </form>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard" class="dash-wrap hidden">
+  <div class="dash-top">
+    <div>
+      <div class="eyebrow">Panel Panitia &middot; Angkatan 43</div>
+      <h1>Hasil Voting Ketua Angkatan</h1>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <div>
+        <span class="label">Status Polling</span><br>
+        <span class="status-badge" id="statusBadge">MEMUAT…</span>
+      </div>
+    </div>
+    <div class="toggle-group">
+      <button class="stamp-btn" id="openBtn" style="padding:12px 22px; font-size:14px;">
+        <span class="ripple" id="openRipple"></span>
+        Buka Voting
+      </button>
+      <button class="ghost-btn" id="closeBtn">Tutup Voting</button>
+    </div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="num" id="totalVotes">0</div>
+      <div class="lbl">Total Suara Masuk</div>
+    </div>
+    <div class="summary-card">
+      <div class="num" id="leadingName">—</div>
+      <div class="lbl">Sementara Unggul</div>
+    </div>
+  </div>
+
+  <div class="results-title">Perolehan Suara Tiap Kandidat</div>
+  <div class="results-list" id="resultsWrap"></div>
+
+  <button class="logout-link" id="logoutBtn">Keluar dari panel panitia</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="app.js"></script>
+<script>
+(function(){
+  const PANITIA_PASSWORD = "panitiangkatan43";
+  const $ = id => document.getElementById(id);
+
+  function fireRipple(rippleId){
+    const ripple = $(rippleId);
+    const s = document.createElement('span');
+    const size = 200;
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = '50%'; s.style.top = '50%';
+    s.style.marginLeft = -(size/2) + 'px';
+    s.style.marginTop = -(size/2) + 'px';
+    ripple.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  }
+
+  function renderCandidateRows(){
+    const wrap = $('resultsWrap');
+    wrap.innerHTML = CANDIDATES.map(c => `
+      <div class="result-row" id="row-${c.id}">
+        <div class="result-top">
+          <div class="result-info">
+            <span class="result-number">${c.kelas}</span>
+            <span class="result-name">${c.nama}</span>
+          </div>
+          <span class="vote-count">0</span>
+        </div>
+        <div class="vote-bar-track"><div class="vote-bar-fill"></div></div>
+      </div>
+    `).join('');
+  }
+
+  function initDashboard(){
+    renderCandidateRows();
+
+    db.ref('votes').on('value', snap => {
+      const data = snap.val() || {};
+      let total = 0, max = 1, leader = null, leaderVotes = -1;
+      CANDIDATES.forEach(c => { if ((data[c.id]||0) > max) max = data[c.id]; });
+      CANDIDATES.forEach(c => {
+        const v = data[c.id] || 0;
+        total += v;
+        if (v > leaderVotes){ leaderVotes = v; leader = c; }
+        const row = $('row-' + c.id);
+        if (row){
+          row.querySelector('.vote-count').textContent = v;
+          row.querySelector('.vote-bar-fill').style.width = (v / max * 100) + '%';
+        }
+      });
+      $('totalVotes').textContent = total;
+      $('leadingName').textContent = (total > 0 && leader) ? leader.kelas : '—';
+    });
+
+    db.ref('settings/votingOpen').on('value', snap => {
+      const open = snap.val() === true;
+      const badge = $('statusBadge');
+      badge.textContent = open ? 'SEDANG BERLANGSUNG' : 'DITUTUP';
+      badge.className = 'status-badge ' + (open ? 'status-open' : 'status-closed');
+      $('openBtn').disabled = open;
+      $('closeBtn').disabled = !open;
+    });
+  }
+
+  function showDashboard(){
+    $('loginScreen').classList.add('hidden');
+    $('dashboard').classList.remove('hidden');
+    initDashboard();
+  }
+
+  $('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    fireRipple('loginRipple');
+    const val = $('passwordInput').value;
+    if (val === PANITIA_PASSWORD){
+      sessionStorage.setItem('panitia43_auth', 'true');
+      setTimeout(showDashboard, 120);
+    } else {
+      $('loginError').textContent = 'Kata sandi salah, coba lagi.';
+      $('passwordInput').value = '';
+      $('passwordInput').focus();
+    }
+  });
+
+  $('openBtn').addEventListener('click', () => {
+    fireRipple('openRipple');
+    db.ref('settings/votingOpen').set(true);
+  });
+  $('closeBtn').addEventListener('click', () => {
+    db.ref('settings/votingOpen').set(false);
+  });
+  $('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('panitia43_auth');
+    location.reload();
+  });
+
+  if (sessionStorage.getItem('panitia43_auth') === 'true'){
+    showDashboard();
+  }
+})();
+</script>
+</body>
+</html>
 
