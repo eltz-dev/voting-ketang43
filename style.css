@@ -1,1 +1,378 @@
+/* =====================================================================
+   PEMILIHAN KETUA ANGKATAN 43 — SMAN 1 SEMIN
+   Design language: malam penghitungan suara — navy ballot night,
+   paper-cream candidate cards, and a red ink-stamp interaction system
+   that echoes "mencoblos" (the physical act of stamping a ballot).
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --navy-950:#0a1220;
+  --navy-900:#0f1c30;
+  --navy-800:#16283f;
+  --navy-700:#1f3350;
+  --navy-600:#2c4463;
+  --navy-500:#3a577c;
+
+  --paper:#f1ead6;
+  --paper-2:#e7dcbe;
+  --paper-line:#d8cba3;
+
+  --ink-red:#b5312f;
+  --ink-red-dark:#8c2321;
+  --ink-red-light:#d8534f;
+
+  --gold:#c9a24b;
+  --gold-soft:#e4c878;
+
+  --text-light:#ece9e0;
+  --text-muted:#8ea0b8;
+  --text-dark:#241d12;
+  --text-dark-muted:#6b5f45;
+
+  --green-ok:#5c8f68;
+  --green-ok-dark:#3e6a48;
+
+  --font-display:'Fraunces', serif;
+  --font-body:'Plus Jakarta Sans', sans-serif;
+  --font-mono:'Space Mono', monospace;
+
+  --shadow-deep:0 24px 70px -24px rgba(0,0,0,.65);
+  --shadow-card:0 14px 34px -14px rgba(0,0,0,.5);
+  --radius-lg:22px;
+  --radius-md:14px;
+  --radius-sm:8px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--navy-950);
+  color:var(--text-light);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* subtle paper-grain over the navy night, keeps it from feeling flat/vector */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.5;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+/* soft vignette + a hint of warm light from the top, like a lamp over a ballot table */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(201,162,75,.14), transparent 60%),
+    radial-gradient(ellipse 1200px 800px at 50% 110%, rgba(181,49,47,.10), transparent 60%);
+}
+
+main,.page{ position:relative; z-index:1; }
+
+a{ color:inherit; }
+
+::selection{ background:var(--gold-soft); color:var(--text-dark); }
+
+/* focus visibility, kept even though we style things heavily */
+button:focus-visible,input:focus-visible,a:focus-visible{
+  outline:2px solid var(--gold-soft);
+  outline-offset:3px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}
+
+/* ---------------------------------------------------------------------
+   Type
+   --------------------------------------------------------------------- */
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--gold-soft);
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.eyebrow::before{
+  content:"";
+  width:26px; height:1px;
+  background:var(--gold-soft);
+  opacity:.7;
+}
+
+h1,h2,h3{
+  font-family:var(--font-display);
+  margin:0;
+  font-weight:600;
+  letter-spacing:-.01em;
+}
+
+/* ---------------------------------------------------------------------
+   Buttons — the "stamp" system
+   --------------------------------------------------------------------- */
+.stamp-btn{
+  --stamp-color:var(--ink-red);
+  --stamp-color-dark:var(--ink-red-dark);
+  position:relative;
+  font-family:var(--font-body);
+  font-weight:700;
+  font-size:16px;
+  letter-spacing:.01em;
+  color:var(--text-light);
+  background:var(--stamp-color);
+  border:none;
+  padding:16px 34px;
+  border-radius:100px;
+  cursor:pointer;
+  isolation:isolate;
+  transform:rotate(-1.2deg);
+  box-shadow:
+    0 2px 0 var(--stamp-color-dark),
+    0 10px 26px -8px rgba(140,35,33,.55);
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease, filter .18s ease;
+}
+.stamp-btn::before{
+  /* ring, like the outer edge of a rubber stamp */
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-radius:100px;
+  border:1.5px solid rgba(255,255,255,.35);
+  pointer-events:none;
+}
+.stamp-btn:hover:not(:disabled){
+  transform:rotate(0deg) translateY(-2px);
+  box-shadow:
+    0 2px 0 var(--stamp-color-dark),
+    0 16px 34px -10px rgba(140,35,33,.6);
+}
+.stamp-btn:active:not(:disabled){
+  transform:rotate(0deg) translateY(1px) scale(.97);
+  box-shadow:0 1px 0 var(--stamp-color-dark);
+}
+.stamp-btn:disabled{
+  cursor:not-allowed;
+  filter:grayscale(.5);
+  opacity:.45;
+  transform:none;
+  box-shadow:none;
+}
+.stamp-btn .ripple{
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  overflow:hidden;
+}
+.stamp-btn .ripple span{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,.55);
+  transform:scale(0);
+  opacity:.8;
+  animation:stampRipple .55s ease-out forwards;
+}
+@keyframes stampRipple{
+  to{ transform:scale(2.6); opacity:0; }
+}
+
+.ghost-btn{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  color:var(--text-light);
+  background:transparent;
+  border:1.5px solid var(--navy-500);
+  padding:13px 26px;
+  border-radius:100px;
+  cursor:pointer;
+  transition:border-color .15s ease, background .15s ease, transform .15s ease;
+}
+.ghost-btn:hover:not(:disabled){
+  border-color:var(--gold-soft);
+  background:rgba(228,200,120,.06);
+}
+.ghost-btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+.gold-btn{
+  font-family:var(--font-body);
+  font-weight:700;
+  font-size:14.5px;
+  color:var(--text-dark);
+  background:linear-gradient(180deg, var(--gold-soft), var(--gold));
+  border:none;
+  padding:13px 28px;
+  border-radius:100px;
+  cursor:pointer;
+  box-shadow:0 10px 22px -10px rgba(201,162,75,.55);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.gold-btn:hover:not(:disabled){ transform:translateY(-1px); }
+.gold-btn:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; }
+
+/* ---------------------------------------------------------------------
+   Modal / popup system (custom — never window.alert)
+   --------------------------------------------------------------------- */
+.modal-overlay{
+  position:fixed; inset:0;
+  z-index:60;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:0;
+  background:rgba(8,13,22,.72);
+  backdrop-filter:blur(6px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+}
+@media (min-width:640px){
+  .modal-overlay{ align-items:center; padding:24px; }
+}
+.modal-overlay.show{ opacity:1; pointer-events:auto; }
+
+.modal-card{
+  width:100%;
+  max-width:440px;
+  background:var(--paper);
+  color:var(--text-dark);
+  border-radius:22px 22px 0 0;
+  padding:34px 28px 28px;
+  position:relative;
+  transform:translateY(40px);
+  transition:transform .3s cubic-bezier(.2,.9,.3,1.1);
+  box-shadow:var(--shadow-deep);
+  max-height:88vh;
+  overflow-y:auto;
+}
+@media (min-width:640px){
+  .modal-card{ border-radius:22px; transform:translateY(16px) scale(.97); }
+}
+.modal-overlay.show .modal-card{ transform:translateY(0) scale(1); }
+
+.modal-card::before{
+  content:"";
+  position:absolute;
+  top:12px; left:50%;
+  transform:translateX(-50%);
+  width:40px; height:4px;
+  border-radius:4px;
+  background:var(--paper-line);
+}
+@media (min-width:640px){ .modal-card::before{ display:none; } }
+
+.modal-seal{
+  width:52px; height:52px;
+  border-radius:50%;
+  border:2px solid var(--ink-red);
+  color:var(--ink-red);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono);
+  font-size:22px;
+  font-weight:700;
+  transform:rotate(-8deg);
+  margin-bottom:16px;
+}
+.modal-seal.gold{ border-color:var(--gold); color:var(--gold); }
+.modal-seal.muted{ border-color:var(--text-dark-muted); color:var(--text-dark-muted); }
+
+.modal-card h3{
+  font-size:23px;
+  line-height:1.25;
+  margin-bottom:10px;
+  color:var(--text-dark);
+}
+.modal-card p{
+  font-size:15px;
+  line-height:1.6;
+  color:var(--text-dark-muted);
+  margin:0 0 20px;
+}
+
+.check-row{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  background:var(--paper-2);
+  border:1px solid var(--paper-line);
+  border-radius:var(--radius-md);
+  padding:14px 16px;
+  margin-bottom:20px;
+  cursor:pointer;
+}
+.ballot-checkbox{
+  flex:none;
+  width:22px; height:22px;
+  border-radius:5px;
+  border:2px solid var(--text-dark-muted);
+  background:#fff;
+  position:relative;
+  cursor:pointer;
+  appearance:none;
+  margin-top:1px;
+  transition:border-color .15s ease, background .15s ease;
+}
+.ballot-checkbox:checked{
+  border-color:var(--ink-red);
+  background:var(--ink-red);
+}
+.ballot-checkbox:checked::after{
+  content:"";
+  position:absolute;
+  left:6px; top:2px;
+  width:6px; height:11px;
+  border:solid #fff;
+  border-width:0 2.5px 2.5px 0;
+  transform:rotate(40deg);
+}
+.check-row label{
+  font-size:14px;
+  line-height:1.55;
+  color:var(--text-dark);
+  cursor:pointer;
+}
+
+.modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+.modal-actions .stamp-btn, .modal-actions .ghost-dark{ width:100%; text-align:center; }
+.ghost-dark{
+  font-family:var(--font-body); font-weight:600; font-size:14.5px;
+  background:transparent; border:1.5px solid var(--paper-line);
+  color:var(--text-dark-muted); padding:13px 24px; border-radius:100px; cursor:pointer;
+}
+
+body.modal-open{ overflow:hidden; }
+
+/* ---------------------------------------------------------------------
+   Utility layout
+   --------------------------------------------------------------------- */
+.center-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px 20px;
+}
+.hidden{ display:none !important; }
+
+/* scrollbar, small touch */
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-thumb{ background:var(--navy-600); border-radius:10px; }
 
